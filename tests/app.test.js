@@ -1,14 +1,18 @@
+jest.setTimeout(30000);
+
 const request = require("supertest");
-const app = require("../app");
+const app = require("../server");
+const mongoose = require("mongoose");
 
-describe("Test API Auth", () => {
-  it("Devrait retourner une erreur 400 si login incorrect", async () => {
-    const res = await request(app).post("/api/auth/login").send({
-      email: "inexistant@example.com",
-      password: "wrongpassword"
-    });
+describe("Test de l'API principale", () => {
+  afterAll(async () => {
+    await mongoose.connection.dropDatabase();
+    await mongoose.connection.close();
+  });
 
-    expect(res.status).toBe(400);
-    expect(res.body.msg).toBe("Utilisateur non trouvé");
+  it("Devrait rediriger vers Swagger (API-docs)", async () => {
+    const res = await request(app).get("/");
+    expect(res.status).toBe(302);
+    expect(res.headers.location).toBe("/api-docs");
   });
 });

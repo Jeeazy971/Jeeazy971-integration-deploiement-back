@@ -26,8 +26,7 @@ services:
     environment:
       NODE_ENV: development
       MONGO_URI: mongodb://admin:password@mongodb:27017/maindb?authSource=admin
-      MONGO_URI_TEST: mongodb://admin:password@mongodb:27017/test?authSource=admin
-      JWT_SECRET: mysupersecret
+      JWT_SECRET: supersecretkey
     volumes:
       - .:/app
       - /app/node_modules
@@ -38,7 +37,7 @@ services:
     container_name: backend_test_container
     environment:
       NODE_ENV: test
-      ENV_FILE: ".env.docker"  # On force l'utilisation de .env.docker dans Docker
+      MONGO_URI_TEST: mongodb://admin:password@mongodb:27017/test?authSource=admin
       JWT_SECRET: supersecretkey
     depends_on:
       - mongodb

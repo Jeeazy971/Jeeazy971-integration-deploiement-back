@@ -1,7 +1,7 @@
 # ---------------------------
 # Exclure le dossier des dépendances, à installer dans le conteneur
 # ---------------------------
-node_modules
+# node_modules
 
 # ---------------------------
 # Exclure les fichiers de log
@@ -27,8 +27,8 @@ coverage
 # ---------------------------
 # Exclure les fichiers d'environnement sensibles
 # ---------------------------
-.env
-.env.*
+# .env
+# .env.*
 
 # ---------------------------
 # Exclure les fichiers et dossiers liés à Git

@@ -1,17 +1,12 @@
-FROM node:18
+FROM node:20-alpine
 
-# Définir le dossier de travail
 WORKDIR /app
 
-# Copier package.json et installer les dépendances
 COPY package*.json ./
 RUN npm install
 
-# Copier le reste des fichiers
 COPY . .
 
-# Exposer le port de l'API
 EXPOSE 5000
 
-# Commande par défaut
-CMD ["npm", "run", "dev"]
+CMD ["sh", "-c", "npm install && node seed.js && npm run dev"]
