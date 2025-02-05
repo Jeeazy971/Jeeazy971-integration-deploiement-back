@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongodb/mongodb-community-server:latest
+    container_name: mongodb_container
+    hostname: mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+
+  backend:
+    build: .
+    container_name: backend_container
+    restart: always
+    ports:
+      - "5000:5000"
+    depends_on:
+      - mongodb
+    environment:
+      NODE_ENV: development
+      MONGO_URI: mongodb://admin:password@mongodb:27017/maindb?authSource=admin
+      MONGO_URI_TEST: mongodb://admin:password@mongodb:27017/test?authSource=admin
+      JWT_SECRET: mysupersecret
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: ["sh", "-c", "npm install && node seed.js && npm run dev"]
+
+  tests:
+    build: .
+    container_name: backend_test_container
+    environment:
+      NODE_ENV: test
+      ENV_FILE: ".env.docker"  # On force l'utilisation de .env.docker dans Docker
+      JWT_SECRET: supersecretkey
+    depends_on:
+      - mongodb
+    command: ["sh", "-c", "npm install && npm run test"]
+
+volumes:
+  mongodb_data:
+  mongodb_config:
