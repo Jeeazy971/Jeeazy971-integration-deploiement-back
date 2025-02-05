@@ -1,4 +1,3 @@
-// config/swagger.js
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -12,44 +11,30 @@ const options = {
     },
     servers: [
       {
-        url: process.env.NODE_ENV === 'test'
-          ? 'http://localhost:5000'
-          : 'http://localhost:5000/api',
-        description: 'Serveur local',
+        url: 'http://localhost:5000/api',
+        description: 'Serveur local sur le port 5000',
+      },
+      {
+        url: 'http://localhost:5001/api',
+        description: 'Serveur local sur le port 5001',
+      },
+    ],
+    components: {          
+      securitySchemes: {
+        bearerAuth: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'JWT',
+        },
+      },
+    },
+    security: [                    
+      {
+        bearerAuth: [],
       },
     ],
   },
-  
   apis: ['./src/controllers/*.js', './src/routes/*.js'],
-  components: {
-    schemas: {
-      User: {
-        type: "object",
-        properties: {
-          _id: { type: "string" },
-          firstName: { type: "string" },
-          lastName: { type: "string" },
-          email: { type: "string" },
-          birthDate: { type: "string", format: "date" },
-          city: { type: "string" },
-          postalCode: { type: "string" },
-          role: { type: "string", enum: ["user", "admin"] }
-        }
-      }
-    },
-    securitySchemes: {
-      bearerAuth: {
-        type: "http",
-        scheme: "bearer",
-        bearerFormat: "JWT"
-      }
-    }
-  },
-  security: [
-    {
-      bearerAuth: []
-    }
-  ]
 };
 
 const swaggerSpec = swaggerJsdoc(options);

@@ -1,9 +1,11 @@
+// src/middlewares/authMiddleware.js
 const jwt = require("jsonwebtoken");
 
 exports.authMiddleware = (req, res, next) => {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer "))
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
         return res.status(401).json({ msg: "Accès non autorisé, token manquant" });
+    }
 
     const token = authHeader.split(" ")[1];
     try {

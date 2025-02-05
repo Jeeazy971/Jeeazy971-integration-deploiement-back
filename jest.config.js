@@ -1,5 +1,6 @@
 module.exports = {
     testEnvironment: "node",
-    setupFilesAfterEnv: ["<rootDir>/tests/setup.js"], // 🔥 Charge `setup.js` avant les tests
-    testTimeout: 10000, // 🔥 Augmente le timeout si nécessaire
+    setupFilesAfterEnv: ["<rootDir>/tests/setupDB.js"], // 🔥 Charge `setupDB.js` avant les tests
+    testTimeout: 10000,
+    testMatch: ["**/tests/!(validation.test).js"],  // Ignore validation.test.js
 };

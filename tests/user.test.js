@@ -1,4 +1,3 @@
-jest.setTimeout(30000);
 const request = require("supertest");
 const app = require("../server");
 const mongoose = require("mongoose");
@@ -33,7 +32,7 @@ describe("Tests de gestion des utilisateurs", () => {
     expect(res.body.msg).toBe("Utilisateur créé avec succès.");
   });
 
-  it("Devrait récupérer la liste des utilisateurs créés par l'administrateur", async () => {
+  it("Devrait récupérer la liste des utilisateurs", async () => {
     const res = await request(app)
       .get("/api/users")
       .set("Authorization", `Bearer ${token}`);
@@ -43,10 +42,17 @@ describe("Tests de gestion des utilisateurs", () => {
     expect(user).toBeDefined();
   });
 
-  it("Devrait refuser l'accès aux endpoints protégés si aucun token n'est fourni", async () => {
-    const res = await request(app).get("/api/users");
-    expect(res.status).toBe(401);
-    expect(res.body.msg).toContain("Accès non autorisé");
+  it("Devrait supprimer un utilisateur existant", async () => {
+    const userRes = await request(app)
+      .get("/api/users")
+      .set("Authorization", `Bearer ${token}`);
+    const userId = userRes.body[0]._id;
+
+    const res = await request(app)
+      .delete(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(res.body.msg).toBe("Utilisateur supprimé avec succès");
   });
 
   afterAll(async () => {

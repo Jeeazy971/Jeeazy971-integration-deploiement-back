@@ -1,6 +1,6 @@
+// seed.js
 const connectDB = require("./config/db");
 const User = require("./src/models/User");
-const bcrypt = require("bcryptjs");
 
 const seedAdmin = async () => {
   try {
@@ -10,12 +10,11 @@ const seedAdmin = async () => {
     if (existingAdmin) {
       console.log("✅ Admin déjà présent");
     } else {
-      const hashedPassword = await bcrypt.hash("ANKymoUTFu4rbybmQ9Mt", 10);
       const admin = new User({
         firstName: "Admin",
         lastName: "User",
         email: adminEmail,
-        password: hashedPassword,
+        password: "ANKymoUTFu4rbybmQ9Mt",
         birthDate: new Date("1990-01-01"),
         city: "Paris",
         postalCode: "75000",

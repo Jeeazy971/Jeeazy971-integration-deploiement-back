@@ -1,57 +1,32 @@
+// src/controllers/authController.js
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
+// Note : bcrypt n’est pas nécessaire ici si comparePassword est implémenté dans le modèle
 
 /**
- * @swagger
- * /auth/login:
- *   post:
- *     summary: Connexion de l'administrateur et obtention du token JWT
- *     tags: [Authentification]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 example: loise.fenoll@ynov.com
- *               password:
- *                 type: string
- *                 example: ANKymoUTFu4rbybmQ9Mt
- *     responses:
- *       200:
- *         description: Retourne un token JWT.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 token:
- *                   type: string
- *       400:
- *         description: Email ou mot de passe incorrect.
- *       403:
- *         description: Accès réservé aux administrateurs.
- *       500:
- *         description: Erreur serveur.
+ * Connexion de l'administrateur.
  */
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
+    if (!email || !password) {
       return res.status(400).json({ msg: "Email et mot de passe sont requis." });
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).json({ msg: "Utilisateur non trouvé" });
+    if (!user) {
+      return res.status(400).json({ msg: "Utilisateur non trouvé" });
+    }
 
     const isMatch = await user.comparePassword(password);
-    if (!isMatch) return res.status(400).json({ msg: "Mot de passe incorrect" });
+    if (!isMatch) {
+      return res.status(400).json({ msg: "Mot de passe incorrect" });
+    }
 
-    // Seul un administrateur peut se connecter via cette route
-    if (user.role !== "admin")
+    // Seul l'administrateur peut se connecter via cette route
+    if (user.role !== "admin") {
       return res.status(403).json({ msg: "Accès réservé aux administrateurs" });
+    }
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -66,51 +41,28 @@ exports.login = async (req, res) => {
 };
 
 /**
- * @swagger
- * /auth/register-admin:
- *   post:
- *     summary: Créer un administrateur avec email et mot de passe
- *     tags: [Authentification]
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "loise.fenoll@ynov.com"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "ANKymoUTFu4rbybmQ9Mt"
- *     responses:
- *       201:
- *         description: Administrateur créé avec succès.
- *       400:
- *         description: Un administrateur existe déjà.
- *       500:
- *         description: Erreur serveur.
+ * Création d'un administrateur.
+ * La création est autorisée uniquement s'il n'existe pas déjà d'admin.
  */
 exports.registerAdmin = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password)
+    if (!email || !password) {
       return res.status(400).json({ msg: "Email et mot de passe sont requis." });
+    }
 
-    // Vérifier si un admin existe déjà
-    // const adminExist = await User.findOne({ role: "admin" });
-    // if (adminExist)
-    //   return res.status(400).json({ msg: "Un administrateur existe déjà." });
+    // Vérifier si un admin existe déjà (indépendamment de l'email)
+    const adminExist = await User.findOne({ role: "admin" });
+    if (adminExist) {
+      return res.status(400).json({ msg: "Un administrateur existe déjà." });
+    }
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+    // Créer l'admin en fournissant le mot de passe en clair
     const admin = new User({
       firstName: "Admin",
       lastName: "User",
       email,
-      password: hashedPassword,
+      password, // en clair
       birthDate: new Date("1990-01-01"),
       city: "Paris",
       postalCode: "75000",
