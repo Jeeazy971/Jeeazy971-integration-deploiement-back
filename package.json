@@ -7,7 +7,6 @@
     "dev": "nodemon server.js",
     "test": "cross-env NODE_ENV=test npm run setup && jest --config=jest.config.js --runInBand --detectOpenHandles --forceExit",
     "test:coverage": "cross-env NODE_ENV=test jest --coverage",
-    "test:validation": "jest --config=jest.validation.config.js",
     "seed": "node seed.js",
     "setup": "node tests/setupDB.js"
   },

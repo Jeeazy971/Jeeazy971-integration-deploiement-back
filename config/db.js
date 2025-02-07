@@ -14,7 +14,9 @@ if (process.env.ENV_FILE) {
 }
 
 dotenv.config({ path: envFile });
-console.log(`Chargement des variables d'environnement depuis ${envFile}`);
+if (process.env.NODE_ENV !== "test") {
+  console.log(`Chargement des variables d'environnement depuis ${envFile}`);
+}
 
 const connectDB = async () => {
   try {
@@ -25,12 +27,16 @@ const connectDB = async () => {
     if (!mongoUri) {
       throw new Error("L'URI de MongoDB n'est pas définie");
     }
-    console.log(`🌍 Connexion aux ${process.env.NODE_ENV} MongoDB avec URI: ${mongoUri}`);
+    if (process.env.NODE_ENV !== "test") {
+      console.log(`🌍 Connexion aux ${process.env.NODE_ENV} MongoDB avec URI: ${mongoUri}`);
+    }
     await mongoose.connect(mongoUri, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });
-    console.log(`✅ MongoDB Connecté à ${mongoose.connection.name}`);
+    if (process.env.NODE_ENV !== "test") {
+      console.log(`✅ MongoDB Connecté à ${mongoose.connection.name}`);
+    }
   } catch (error) {
     console.error("❌ Erreur de connexion MongoDB:", error.message);
     if (process.env.NODE_ENV !== "test") process.exit(1);
