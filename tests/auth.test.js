@@ -71,12 +71,12 @@ describe("Tests d'authentification", () => {
 
   afterAll(async () => {
     console.log("🧹 Nettoyage de la base de test...");
-    await User.deleteMany({ role: "user" }); // Supprimer uniquement les utilisateurs normaux
+    await User.deleteMany({ role: "user" });
     console.log("✅ Suppression des utilisateurs test OK.");
 
     console.log("🔌 Fermeture de la connexion MongoDB...");
     await mongoose.connection.dropDatabase();
-    await new Promise(resolve => setTimeout(resolve, 500)); // Ajout d'un délai pour éviter timeout
+    await new Promise(resolve => setTimeout(resolve, 500));
     await mongoose.connection.close();
     console.log("✅ Connexion MongoDB fermée.");
   });
