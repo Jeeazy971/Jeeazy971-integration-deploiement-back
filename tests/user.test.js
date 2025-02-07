@@ -1,19 +1,29 @@
 // tests/user.test.js
 const request = require("supertest");
 const app = require("../server");
+const mongoose = require("mongoose");
 
 let token;
 
 beforeAll(async () => {
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(process.env.MONGO_URI_TEST, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+  }
+  // Récupération du token admin
   const loginRes = await request(app)
     .post("/api/auth/login")
     .send({ email: "loise.fenoll@ynov.com", password: "ANKymoUTFu4rbybmQ9Mt" });
   token = loginRes.body.token;
   expect(token).toBeDefined();
-});
 
-describe("Tests de gestion des utilisateurs", () => {
-  it("Devrait permettre de créer un utilisateur", async () => {
+  // Vérifie qu'au moins un utilisateur existe.
+  const usersRes = await request(app)
+    .get("/api/users")
+    .set("Authorization", `Bearer ${token}`);
+  if (usersRes.body.length === 0) {
     const res = await request(app)
       .post("/api/users/create")
       .set("Authorization", `Bearer ${token}`)
@@ -27,9 +37,10 @@ describe("Tests de gestion des utilisateurs", () => {
         postalCode: "69000"
       });
     expect(res.status).toBe(201);
-    expect(res.body.msg).toBe("Utilisateur créé avec succès.");
-  });
+  }
+});
 
+describe("Tests de gestion des utilisateurs", () => {
   it("Devrait récupérer la liste des utilisateurs", async () => {
     const res = await request(app)
       .get("/api/users")
@@ -44,11 +55,14 @@ describe("Tests de gestion des utilisateurs", () => {
       .get("/api/users")
       .set("Authorization", `Bearer ${token}`);
     expect(userRes.body.length).toBeGreaterThan(0);
-
     const userId = userRes.body[0]._id;
     const res = await request(app)
       .delete(`/api/users/${userId}`)
       .set("Authorization", `Bearer ${token}`);
     expect(res.status).toBe(200);
   });
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
 });

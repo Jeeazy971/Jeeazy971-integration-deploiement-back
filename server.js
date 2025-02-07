@@ -1,27 +1,28 @@
-require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const { swaggerUi, swaggerSpec } = require('./config/swagger');
 
-// Importation des routes
+// Importation des routes existantes
 const userRoutes = require('./src/routes/userRoutes');
 const authRoutes = require('./src/routes/authRoutes');
+// Ajout des routes publiques
+const publicRoutes = require('./src/routes/publicRoutes');
 
 const appInstance = express();
 
 // Connexion à MongoDB
 connectDB();
 
-// Middlewares
 appInstance.use(express.json());
 appInstance.use(cors());
 
 // Routes API
 appInstance.use('/api/users', userRoutes);
 appInstance.use('/api/auth', authRoutes);
+appInstance.use('/api/public', publicRoutes);
 
-// Swagger – l'instance swaggerUi doit être utilisée ici
+// Swagger – documentation de l’API
 appInstance.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 // Redirection de la racine vers Swagger
@@ -29,7 +30,7 @@ appInstance.get('/', (req, res) => {
     res.redirect('/api-docs');
 });
 
-// Démarrage du serveur uniquement si l'environnement n'est pas en mode test
+// Démarrage du serveur (uniquement si NODE_ENV n'est pas "test")
 if (process.env.NODE_ENV !== 'test') {
     const PORT = process.env.PORT || 5000;
     const server = appInstance.listen(PORT, () => {
@@ -43,6 +44,5 @@ if (process.env.NODE_ENV !== 'test') {
         });
     });
 }
-
 
 module.exports = appInstance;
