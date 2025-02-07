@@ -19,18 +19,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker
-        run: docker compose up -d
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
 
-      - name: Wait for MongoDB to be ready
-        run: sleep 10
+      - name: Set up MongoDB URI
+        run: echo "MONGO_URI_TEST=mongodb://localhost:27017/test" >> $GITHUB_ENV
+
+      - name: Start MongoDB (via Docker)
+        run: |
+          docker run -d --name mongodb_container -p 27017:27017 mongo:latest
+          sleep 10
 
       - name: Install dependencies
         run: npm install
 
       - name: Run tests
-        run: docker compose run --rm tests
+        run: npm run test
 
+      - name: Stop MongoDB (Clean Up)
+        run: docker stop mongodb_container && docker rm mongodb_container
 
   # deploy:
   #   name: Deploy to Vercel
