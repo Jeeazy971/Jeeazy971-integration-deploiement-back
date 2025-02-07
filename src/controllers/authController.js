@@ -1,7 +1,6 @@
 // src/controllers/authController.js
 const User = require("../models/User");
 const jwt = require("jsonwebtoken");
-// Note : bcrypt n’est pas nécessaire ici si comparePassword est implémenté dans le modèle
 
 /**
  * Connexion de l'administrateur.
@@ -41,8 +40,7 @@ exports.login = async (req, res) => {
 };
 
 /**
- * Création d'un administrateur.
- * La création est autorisée uniquement s'il n'existe pas déjà d'admin.
+ * Création d'un administrateur (si aucun admin n'existe déjà).
  */
 exports.registerAdmin = async (req, res) => {
   try {
@@ -51,18 +49,16 @@ exports.registerAdmin = async (req, res) => {
       return res.status(400).json({ msg: "Email et mot de passe sont requis." });
     }
 
-    // Vérifier si un admin existe déjà (indépendamment de l'email)
     const adminExist = await User.findOne({ role: "admin" });
     if (adminExist) {
       return res.status(400).json({ msg: "Un administrateur existe déjà." });
     }
 
-    // Créer l'admin en fournissant le mot de passe en clair
     const admin = new User({
       firstName: "Admin",
       lastName: "User",
       email,
-      password, // en clair
+      password,
       birthDate: new Date("1990-01-01"),
       city: "Paris",
       postalCode: "75000",

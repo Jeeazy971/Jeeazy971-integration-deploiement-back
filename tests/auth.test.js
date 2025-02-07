@@ -1,3 +1,4 @@
+// tests/auth.test.js
 const request = require("supertest");
 const app = require("../server");
 const mongoose = require("mongoose");
@@ -7,13 +8,9 @@ const bcrypt = require("bcryptjs");
 describe("Tests d'authentification", () => {
   beforeAll(async () => {
     console.log("🌍 Connexion à la base de test MongoDB...");
-    await mongoose.connect(process.env.MONGO_URI_TEST, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGO_URI_TEST);
     console.log("✅ MongoDB Connecté à test");
 
-    // Vérifier si l'admin existe avant d'insérer
     const existingAdmin = await User.findOne({ email: "loise.fenoll@ynov.com" });
     if (!existingAdmin) {
       const hashedPassword = await bcrypt.hash("ANKymoUTFu4rbybmQ9Mt", 10);
@@ -40,7 +37,6 @@ describe("Tests d'authentification", () => {
         email: "loise.fenoll@ynov.com",
         password: "ANKymoUTFu4rbybmQ9Mt",
       });
-
     expect(res.status).toBe(200);
     expect(res.body.token).toBeDefined();
   });
@@ -52,7 +48,6 @@ describe("Tests d'authentification", () => {
         email: "invalid@example.com",
         password: "wrongpassword",
       });
-
     expect(res.status).toBe(400);
     expect(res.body.msg).toBe("Utilisateur non trouvé");
   });
@@ -64,20 +59,17 @@ describe("Tests d'authentification", () => {
         email: "loise.fenoll@ynov.com",
         password: "wrongpassword",
       });
-
     expect(res.status).toBe(400);
     expect(res.body.msg).toBe("Mot de passe incorrect");
   });
 
   afterAll(async () => {
     console.log("🧹 Nettoyage de la base de test...");
-    await User.deleteMany({ role: "user" });
+    await User.deleteMany({ role: "user" }); 
     console.log("✅ Suppression des utilisateurs test OK.");
 
     console.log("🔌 Fermeture de la connexion MongoDB...");
-    await mongoose.connection.dropDatabase();
-    await new Promise(resolve => setTimeout(resolve, 500));
-    await mongoose.connection.close();
+    await mongoose.disconnect();
     console.log("✅ Connexion MongoDB fermée.");
   });
 });

@@ -1,5 +1,5 @@
+// src/controllers/userController.js
 const User = require("../models/User");
-
 
 exports.createUser = async (req, res) => {
   try {
@@ -30,7 +30,6 @@ exports.createUser = async (req, res) => {
   }
 };
 
-
 exports.getUsers = async (req, res) => {
   try {
     if (!req.user || req.user.role !== "admin") {
@@ -43,7 +42,6 @@ exports.getUsers = async (req, res) => {
     return res.status(500).json({ msg: "Erreur serveur" });
   }
 };
-
 
 exports.deleteUser = async (req, res) => {
   try {
@@ -61,7 +59,6 @@ exports.deleteUser = async (req, res) => {
     return res.status(500).json({ msg: "Erreur serveur" });
   }
 };
-
 
 exports.getAdmins = async (req, res) => {
   try {

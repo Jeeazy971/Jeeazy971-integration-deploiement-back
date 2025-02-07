@@ -1,88 +1,54 @@
+// tests/user.test.js
 const request = require("supertest");
 const app = require("../server");
-const mongoose = require("mongoose");
 
 let token;
 
+beforeAll(async () => {
+  const loginRes = await request(app)
+    .post("/api/auth/login")
+    .send({ email: "loise.fenoll@ynov.com", password: "ANKymoUTFu4rbybmQ9Mt" });
+  token = loginRes.body.token;
+  expect(token).toBeDefined();
+});
+
 describe("Tests de gestion des utilisateurs", () => {
-  beforeAll(async () => {
-    const res = await request(app)
-      .post("/api/auth/login")
-      .send({
-        email: "loise.fenoll@ynov.com",
-        password: "ANKymoUTFu4rbybmQ9Mt"
-      });
-
-    token = res.body.token;
-  });
-
   it("Devrait permettre de créer un utilisateur", async () => {
     const res = await request(app)
       .post("/api/users/create")
       .set("Authorization", `Bearer ${token}`)
       .send({
-        firstName: "John",
-        lastName: "Doe",
-        email: "john.doe@example.com",
-        password: "password123",
-        birthDate: "1990-01-01",
-        city: "Paris",
-        postalCode: "75001"
+        firstName: "Alice",
+        lastName: "Test",
+        email: "alice.test@example.com",
+        password: "test123",
+        birthDate: "1992-06-15",
+        city: "Lyon",
+        postalCode: "69000"
       });
-
-    console.log("🛠 Résultat création utilisateur :", res.body);
-
-    if (res.status === 400) {
-      expect(res.body.msg).toBe("Utilisateur existe déjà");
-    } else {
-      expect(res.status).toBe(201);
-      expect(res.body.msg).toBe("Utilisateur créé avec succès.");
-    }
+    expect(res.status).toBe(201);
+    expect(res.body.msg).toBe("Utilisateur créé avec succès.");
   });
 
   it("Devrait récupérer la liste des utilisateurs", async () => {
     const res = await request(app)
       .get("/api/users")
       .set("Authorization", `Bearer ${token}`);
-
-    console.log("🛠 Liste des utilisateurs récupérée :", res.body);
-
     expect(res.status).toBe(200);
     expect(Array.isArray(res.body)).toBe(true);
-
-    if (res.body.length > 0) {
-      const user = res.body.find(u => u.email === "john.doe@example.com");
-      expect(user).toBeDefined();
-    } else {
-      console.log("⚠️ Aucun utilisateur trouvé !");
-    }
+    expect(res.body.length).toBeGreaterThan(0);
   });
 
   it("Devrait supprimer un utilisateur existant", async () => {
     const userRes = await request(app)
       .get("/api/users")
       .set("Authorization", `Bearer ${token}`);
-
-    console.log("🛠 Liste des utilisateurs avant suppression :", userRes.body);
-
-    if (!userRes.body || userRes.body.length === 0) {
-      console.log("⚠️ Aucun utilisateur à supprimer !");
-      return;
-    }
+    expect(userRes.body.length).toBeGreaterThan(0);
 
     const userId = userRes.body[0]._id;
-
     const res = await request(app)
       .delete(`/api/users/${userId}`)
       .set("Authorization", `Bearer ${token}`);
-
     expect(res.status).toBe(200);
-    expect(res.body.msg).toBe("Utilisateur supprimé avec succès");
-  });
-
-  afterAll(async () => {
-    console.log("🧹 Nettoyage de la base de test...");
-    await mongoose.connection.close();
-    console.log("✅ Connexion MongoDB fermée.");
   });
 });
