@@ -22,21 +22,48 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
 
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Set up MongoDB URI for tests
+        run: echo "MONGO_URI_TEST=mongodb://localhost:27017/test" >> $GITHUB_ENV
+
+      - name: Start MongoDB (via Docker)
+        run: |
+          docker run -d --name mongodb_container -p 27017:27017 mongo:latest
+          sleep 10
 
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm run test
+      - name: Wait for MongoDB to be ready
+        run: |
+          for i in {1..10}; do
+            if nc -z localhost 27017; then
+              echo "MongoDB is ready!"
+              exit 0
+            fi
+            echo "Waiting for MongoDB..."
+            sleep 3
+          done
+          echo "MongoDB did not start in time!"
+          exit 1
+
+      - name: Run setup
+        run: npm run setup
+
+      - name: Run tests with coverage
+        run: npm run test:coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage
+          fail_ci_if_error: true
+
+      - name: Stop MongoDB (Clean Up)
+        run: docker stop mongodb_container && docker rm mongodb_container
+
 
   # deploy:
   #   name: Deploy to Vercel
@@ -46,15 +73,15 @@ jobs:
   #   steps:
   #     - name: Checkout code
   #       uses: actions/checkout@v4
-
+  #
   #     - name: Setup Node.js
   #       uses: actions/setup-node@v4
   #       with:
-  #         node-version: '20'
-
+  #         node-version: "20"
+  #
   #     - name: Install dependencies
   #       run: npm install
-
+  #
   #     - name: Deploy to Vercel
   #       uses: amondnet/vercel-action@v20
   #       with:

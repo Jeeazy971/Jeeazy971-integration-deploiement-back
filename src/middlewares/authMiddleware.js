@@ -1,18 +1,18 @@
-const jwt = require('jsonwebtoken');
+// src/middlewares/authMiddleware.js
+const jwt = require("jsonwebtoken");
 
 exports.authMiddleware = (req, res, next) => {
-    const token = req.header('Authorization');
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        return res.status(401).json({ msg: "Accès non autorisé, token manquant" });
+    }
 
-    if (!token) return res.status(401).json({ msg: 'Accès non autorisé, token manquant' });
-
+    const token = authHeader.split(" ")[1];
     try {
-        const decoded = jwt.verify(token.replace('Bearer ', ''), process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         req.user = decoded;
-
-        console.log("Utilisateur authentifié :", req.user); // 🔥 DEBUG pour voir si `role` est bien lu
-
         next();
     } catch (error) {
-        res.status(401).json({ msg: 'Token invalide' });
+        return res.status(401).json({ msg: "Token invalide" });
     }
 };

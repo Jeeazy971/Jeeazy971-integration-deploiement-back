@@ -5,17 +5,21 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'API Intégration Front Back',
+      title: 'Backend API Documentation',
       version: '1.0.0',
       description: 'Documentation de l\'API pour la gestion des utilisateurs',
     },
     servers: [
       {
-        url: 'http://localhost:5000',
-        description: 'Serveur local',
+        url: 'http://localhost:5000/api',
+        description: 'Serveur local sur le port 5000',
+      },
+      {
+        url: 'http://localhost:5001/api',
+        description: 'Serveur local sur le port 5001',
       },
     ],
-    components: {
+    components: {          
       securitySchemes: {
         bearerAuth: {
           type: 'http',
@@ -24,19 +28,18 @@ const options = {
         },
       },
     },
-    security: [
+    security: [                    
       {
         bearerAuth: [],
       },
     ],
   },
-  apis: ['./src/routes/*.js'], // Swagger va chercher les définitions dans les fichiers de routes
+  apis: ['./src/controllers/*.js', './src/routes/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
 
-const swaggerDocs = (app) => {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+module.exports = {
+  swaggerUi,
+  swaggerSpec,
 };
-
-module.exports = swaggerDocs;

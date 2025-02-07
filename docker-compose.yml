@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   mongodb:
-    image: mongodb/mongodb-community-server:latest
+    image: mongo:latest
     container_name: mongodb_container
     hostname: mongodb
     restart: always
@@ -14,6 +14,11 @@ services:
     volumes:
       - mongodb_data:/data/db
       - mongodb_config:/data/configdb
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   backend:
     build: .
@@ -22,12 +27,13 @@ services:
     ports:
       - "5000:5000"
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     environment:
+      ENV_FILE: .env.docker
       NODE_ENV: development
       MONGO_URI: mongodb://admin:password@mongodb:27017/maindb?authSource=admin
-      MONGO_URI_TEST: mongodb://admin:password@mongodb:27017/test?authSource=admin
-      JWT_SECRET: mysupersecret
+      JWT_SECRET: supersecretkey
     volumes:
       - .:/app
       - /app/node_modules
@@ -38,10 +44,11 @@ services:
     container_name: backend_test_container
     environment:
       NODE_ENV: test
-      ENV_FILE: ".env.docker"  # On force l'utilisation de .env.docker dans Docker
+      MONGO_URI_TEST: mongodb://admin:password@mongodb:27017/test?authSource=admin
       JWT_SECRET: supersecretkey
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     command: ["sh", "-c", "npm install && npm run test"]
 
 volumes:

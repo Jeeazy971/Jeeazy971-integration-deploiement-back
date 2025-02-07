@@ -1,209 +1,183 @@
-const express = require('express');
-const { getUsers, getAdmins, createUser, deleteUser } = require('../controllers/userController');
-const { authMiddleware } = require('../middlewares/authMiddleware');
+const express = require("express");
+const { createUser, getUsers, deleteUser, getAdmins } = require("../controllers/userController");
+const { authMiddleware } = require("../middlewares/authMiddleware");
 const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Utilisateurs
- *   description: Gestion des utilisateurs
- */
-
-/**
- * @swagger
- * components:
- *   securitySchemes:
- *     bearerAuth:
- *       type: http
- *       scheme: bearer
- *       bearerFormat: JWT
- *   schemas:
- *     User:
- *       type: object
- *       required:
- *         - firstName
- *         - lastName
- *         - email
- *         - password
- *         - birthDate
- *         - city
- *         - postalCode
- *       properties:
- *         id:
- *           type: string
- *           example: "60b6c6e5d5a5a823d4f01b99"
- *         firstName:
- *           type: string
- *           example: "John"
- *         lastName:
- *           type: string
- *           example: "Doe"
- *         email:
- *           type: string
- *           format: email
- *           example: "john.doe@example.com"
- *         password:
- *           type: string
- *           format: password
- *           example: "password123"
- *         birthDate:
- *           type: string
- *           format: date
- *           example: "2000-05-15"
- *         city:
- *           type: string
- *           example: "Paris"
- *         postalCode:
- *           type: string
- *           pattern: "^[0-9]{5}$"
- *           example: "75000"
- *     RegisterResponse:
- *       type: object
- *       properties:
- *         msg:
- *           type: string
- *           example: "Utilisateur enregistré avec succès"
- *     CreateUserRequest:
- *       type: object
- *       required:
- *         - firstName
- *         - lastName
- *         - email
- *         - password
- *         - birthDate
- *         - city
- *         - postalCode
- *       properties:
- *         firstName:
- *           type: string
- *           example: "Alice"
- *         lastName:
- *           type: string
- *           example: "Dupont"
- *         email:
- *           type: string
- *           format: email
- *           example: "alice.dupont@example.com"
- *         password:
- *           type: string
- *           format: password
- *           example: "securepassword123"
- *         birthDate:
- *           type: string
- *           format: date
- *           example: "1990-06-15"
- *         city:
- *           type: string
- *           example: "Lyon"
- *         postalCode:
- *           type: string
- *           pattern: "^[0-9]{5}$"
- *           example: "69000"
- *         isAdmin:
- *           type: boolean
- *           example: false
- *     CreateUserResponse:
- *       type: object
- *       properties:
- *         msg:
- *           type: string
- *           example: "Utilisateur créé avec succès."
- */
-
-
-/**
- * @swagger
- * /api/users/create:
+ * /users/create:
  *   post:
- *     summary: Créer un utilisateur ou un administrateur (réservé aux admins)
+ *     summary: Créer un utilisateur par l'administrateur
  *     tags: [Utilisateurs]
  *     security:
  *       - bearerAuth: []
  *     requestBody:
+ *       description: Objet contenant les informations de l'utilisateur à créer.
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/CreateUserRequest'
+ *             type: object
+ *             properties:
+ *               firstName:
+ *                 type: string
+ *                 example: "Alice"
+ *               lastName:
+ *                 type: string
+ *                 example: "Dupont"
+ *               email:
+ *                 type: string
+ *                 example: "alice.dupont@example.com"
+ *               password:
+ *                 type: string
+ *                 example: "StrongPassword123"
+ *               birthDate:
+ *                 type: string
+ *                 format: date
+ *                 example: "1980-05-20"
+ *               city:
+ *                 type: string
+ *                 example: "Paris"
+ *               postalCode:
+ *                 type: string
+ *                 example: "75001"
+ *             required:
+ *               - firstName
+ *               - lastName
+ *               - email
+ *               - password
+ *               - birthDate
+ *               - city
+ *               - postalCode
  *     responses:
  *       201:
- *         description: Succès - Utilisateur créé
+ *         description: Utilisateur créé avec succès.
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/CreateUserResponse'
+ *               type: object
+ *               properties:
+ *                 msg:
+ *                   type: string
+ *                   example: "Utilisateur créé avec succès."
  *       400:
- *         description: Erreur - Données invalides
+ *         description: Utilisateur déjà existant.
  *       403:
- *         description: Accès interdit - Authentification requise
+ *         description: Accès interdit.
  *       500:
- *         description: Erreur serveur
+ *         description: Erreur serveur.
  */
-router.post("/create", authMiddleware, createUser); // 🔒 Route protégée avec JWT
+router.post("/create", authMiddleware, createUser);
 
 /**
  * @swagger
- * /api/users:
+ * /users:
  *   get:
- *     summary: Récupérer la liste des utilisateurs (email et date de naissance cachés)
- *     tags: [Utilisateurs]
- *     responses:
- *       200:
- *         description: Succès - Liste des utilisateurs
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/User'
- */
-router.get("/", getUsers);
-
-/**
- * @swagger
- * /api/users/admins:
- *   get:
- *     summary: Récupérer la liste des administrateurs (réservé aux admins)
+ *     summary: Récupérer la liste des utilisateurs créés par l'administrateur connecté
  *     tags: [Utilisateurs]
  *     security:
  *       - bearerAuth: []
  *     responses:
  *       200:
- *         description: Succès - Liste des administrateurs
+ *         description: Liste des utilisateurs.
  *         content:
  *           application/json:
  *             schema:
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
+ *             examples:
+ *               exemple:
+ *                 value: [
+ *                   {
+ *                     "_id": "60f7b2c9e3a1f1234567890a",
+ *                     "firstName": "Alice",
+ *                     "lastName": "Dupont",
+ *                     "email": "alice.dupont@example.com",
+ *                     "birthDate": "1980-05-20T00:00:00.000Z",
+ *                     "city": "Paris",
+ *                     "postalCode": "75001",
+ *                     "role": "user"
+ *                   }
+ *                 ]
  *       403:
- *         description: Accès interdit - Authentification requise
+ *         description: Accès interdit.
+ *       500:
+ *         description: Erreur serveur.
  */
-router.get('/admins', authMiddleware, getAdmins);
+router.get("/", authMiddleware, getUsers);
 
 /**
  * @swagger
- * /api/users/{id}:
+ * /users/admins:
+ *   get:
+ *     summary: Récupérer la liste de tous les administrateurs
+ *     tags: [Utilisateurs]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Liste des administrateurs.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/User'
+ *             examples:
+ *               exemple:
+ *                 value: [
+ *                   {
+ *                     "_id": "60f7b2c9e3a1f1234567890b",
+ *                     "firstName": "Admin",
+ *                     "lastName": "User",
+ *                     "email": "loise.fenoll@ynov.com",
+ *                     "birthDate": "1990-01-01T00:00:00.000Z",
+ *                     "city": "Paris",
+ *                     "postalCode": "75000",
+ *                     "role": "admin"
+ *                   }
+ *                 ]
+ *       403:
+ *         description: Accès interdit.
+ *       500:
+ *         description: Erreur serveur.
+ */
+router.get("/admins", authMiddleware, getAdmins);
+
+/**
+ * @swagger
+ * /users/{id}:
  *   delete:
- *     summary: Supprimer un utilisateur (admin uniquement)
+ *     summary: Supprimer un utilisateur créé par l'administrateur
  *     tags: [Utilisateurs]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - name: id
- *         in: path
- *         required: true
+ *       - in: path
+ *         name: id
  *         schema:
  *           type: string
+ *         required: true
+ *         description: L'ID de l'utilisateur à supprimer, par exemple "60f7b2c9e3a1f1234567890a"
  *     responses:
  *       200:
- *         description: Succès - Utilisateur supprimé
+ *         description: Utilisateur supprimé avec succès.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 msg:
+ *                   type: string
+ *                   example: "Utilisateur supprimé avec succès"
  *       403:
- *         description: Accès interdit - Authentification requise
+ *         description: Accès interdit.
+ *       404:
+ *         description: Utilisateur non trouvé.
  *       500:
- *         description: Erreur serveur
+ *         description: Erreur serveur.
  */
-router.delete('/:id', authMiddleware, deleteUser);
+router.delete("/:id", authMiddleware, deleteUser);
 
 module.exports = router;

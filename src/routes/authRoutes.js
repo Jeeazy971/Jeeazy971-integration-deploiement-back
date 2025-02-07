@@ -4,13 +4,6 @@ const router = express.Router();
 
 /**
  * @swagger
- * tags:
- *   name: Authentification
- *   description: Routes pour l'authentification des utilisateurs
- */
-
-/**
- * @swagger
  * components:
  *   schemas:
  *     LoginRequest:
@@ -27,19 +20,42 @@ const router = express.Router();
  *           type: string
  *           format: password
  *           example: ANKymoUTFu4rbybmQ9Mt
+ *
  *     AuthResponse:
  *       type: object
  *       properties:
  *         token:
  *           type: string
  *           example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+ *
+ *     RegisterAdminRequest:
+ *       type: object
+ *       required:
+ *         - email
+ *         - password
+ *       properties:
+ *         email:
+ *           type: string
+ *           format: email
+ *           example: loise.fenoll@ynov.com
+ *         password:
+ *           type: string
+ *           format: password
+ *           example: ANKymoUTFu4rbybmQ9Mt
  */
 
 /**
  * @swagger
- * /api/auth/login:
+ * tags:
+ *   name: Authentification
+ *   description: Routes pour la gestion de l’authentification des administrateurs
+ */
+
+/**
+ * @swagger
+ * /auth/login:
  *   post:
- *     summary: Authentification et obtention du token JWT
+ *     summary: Authentification de l'administrateur
  *     tags: [Authentification]
  *     requestBody:
  *       required: true
@@ -49,46 +65,39 @@ const router = express.Router();
  *             $ref: '#/components/schemas/LoginRequest'
  *     responses:
  *       200:
- *         description: Succès - Retourne le token JWT
+ *         description: Connexion réussie, renvoie un token JWT.
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
- *         description: Identifiants incorrects
+ *         description: Identifiants incorrects.
+ *       403:
+ *         description: Accès réservé aux administrateurs.
  *       500:
- *         description: Erreur serveur
+ *         description: Erreur serveur.
  */
 router.post('/login', login);
 
 /**
  * @swagger
- * /api/auth/register-admin:
+ * /auth/register-admin:
  *   post:
- *     summary: Créer un administrateur avec email et mot de passe
+ *     summary: Création d'un administrateur (seulement si aucun admin n'existe déjà)
  *     tags: [Authentification]
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
- *             type: object
- *             properties:
- *               email:
- *                 type: string
- *                 format: email
- *                 example: "admin@example.com"
- *               password:
- *                 type: string
- *                 format: password
- *                 example: "securePass123"
+ *             $ref: '#/components/schemas/RegisterAdminRequest'
  *     responses:
  *       201:
- *         description: Succès - Administrateur créé
+ *         description: Administrateur créé avec succès.
  *       400:
- *         description: Un administrateur existe déjà
+ *         description: Un administrateur existe déjà ou données invalides.
  *       500:
- *         description: Erreur serveur
+ *         description: Erreur serveur.
  */
 router.post('/register-admin', registerAdmin);
 

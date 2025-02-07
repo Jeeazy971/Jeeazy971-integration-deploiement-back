@@ -1,34 +1,68 @@
+// tests/user.test.js
 const request = require("supertest");
-const app = require("../app");
+const app = require("../server");
+const mongoose = require("mongoose");
 
-describe("Test Gestion Utilisateurs", () => {
-  let token;
-  
-  beforeAll(async () => {
-    const res = await request(app).post("/api/auth/login").send({
-      email: "admin@example.com",
-      password: "hashedpassword"
+let token;
+
+beforeAll(async () => {
+  if (mongoose.connection.readyState === 0) {
+    await mongoose.connect(process.env.MONGO_URI_TEST, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
     });
-    token = res.body.token;
-  });
+  }
+  // Récupération du token admin
+  const loginRes = await request(app)
+    .post("/api/auth/login")
+    .send({ email: "loise.fenoll@ynov.com", password: "ANKymoUTFu4rbybmQ9Mt" });
+  token = loginRes.body.token;
+  expect(token).toBeDefined();
 
-  it("Devrait permettre à un admin de créer un utilisateur", async () => {
+  // Vérifie qu'au moins un utilisateur existe.
+  const usersRes = await request(app)
+    .get("/api/users")
+    .set("Authorization", `Bearer ${token}`);
+  if (usersRes.body.length === 0) {
     const res = await request(app)
       .post("/api/users/create")
       .set("Authorization", `Bearer ${token}`)
       .send({
-        firstName: "Test",
-        lastName: "User",
-        email: "test@example.com",
-        password: "testpassword",
-        birthDate: "2000-01-01",
-        city: "TestCity",
-        postalCode: "12345",
-        role: "user"
+        firstName: "Alice",
+        lastName: "Test",
+        email: "alice.test@example.com",
+        password: "test123",
+        birthDate: "1992-06-15",
+        city: "Lyon",
+        postalCode: "69000"
       });
-
-    console.log("Response Body:", res.body);
     expect(res.status).toBe(201);
-    expect(res.body.msg).toBe("Utilisateur user créé avec succès.");
+  }
+});
+
+describe("Tests de gestion des utilisateurs", () => {
+  it("Devrait récupérer la liste des utilisateurs", async () => {
+    const res = await request(app)
+      .get("/api/users")
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+    expect(Array.isArray(res.body)).toBe(true);
+    expect(res.body.length).toBeGreaterThan(0);
   });
+
+  it("Devrait supprimer un utilisateur existant", async () => {
+    const userRes = await request(app)
+      .get("/api/users")
+      .set("Authorization", `Bearer ${token}`);
+    expect(userRes.body.length).toBeGreaterThan(0);
+    const userId = userRes.body[0]._id;
+    const res = await request(app)
+      .delete(`/api/users/${userId}`)
+      .set("Authorization", `Bearer ${token}`);
+    expect(res.status).toBe(200);
+  });
+});
+
+afterAll(async () => {
+  await mongoose.disconnect();
 });
