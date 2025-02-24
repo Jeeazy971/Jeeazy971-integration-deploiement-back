@@ -30,19 +30,4 @@ appInstance.get('/', (req, res) => {
     res.redirect('/api-docs');
 });
 
-// Démarrage du serveur (uniquement si NODE_ENV n'est pas "test")
-if (process.env.NODE_ENV !== 'test') {
-    const PORT = process.env.PORT || 5000;
-    const server = appInstance.listen(PORT, () => {
-        console.log(`🚀 Serveur démarré sur le port ${PORT}`);
-    });
-
-    process.on('SIGINT', () => {
-        server.close(() => {
-            console.log('🛑 Serveur arrêté proprement');
-            process.exit(0);
-        });
-    });
-}
-
 module.exports = appInstance;

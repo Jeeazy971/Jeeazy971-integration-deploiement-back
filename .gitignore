@@ -74,3 +74,4 @@ docker-compose.override.yml
 # Autres (ex: Bower, si utilisé)
 # ---------------------------
 bower_components/
+.vercel
