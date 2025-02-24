@@ -20,7 +20,8 @@
     "mongoose": "^8.9.5",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-dist": "^5.19.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "z-schema": "^6.0.2"
   },
   "devDependencies": {
     "codecov": "^3.8.2",
