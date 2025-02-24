@@ -18,8 +18,12 @@ const options = {
         url: 'http://localhost:5001/api',
         description: 'Serveur local sur le port 5001',
       },
+      {
+        url: "https://jeeazy971-integration-deploiement-back.vercel.app/api",
+        description: "Serveur de production",
+      }
     ],
-    components: {          
+    components: {
       securitySchemes: {
         bearerAuth: {
           type: 'http',
@@ -28,7 +32,7 @@ const options = {
         },
       },
     },
-    security: [                    
+    security: [
       {
         bearerAuth: [],
       },
