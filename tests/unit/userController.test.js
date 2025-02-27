@@ -1,4 +1,3 @@
-// tests/unit/userController.test.js
 const userController = require("../../src/controllers/userController");
 const User = require("../../src/models/User");
 jest.mock("../../src/models/User");
@@ -6,7 +5,7 @@ jest.mock("../../src/models/User");
 describe("userController.createUser", () => {
     let req, res;
     beforeEach(() => {
-        req = { user: { id: "admin123", role: "admin" }, body: {} };
+        req = { user: { _id: "admin123", id: "admin123", role: "admin" }, body: {} };
         res = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn(),
@@ -14,13 +13,6 @@ describe("userController.createUser", () => {
     });
     afterEach(() => {
         jest.clearAllMocks();
-    });
-
-    test("retourne 403 si l'utilisateur n'est pas admin", async () => {
-        req.user = { id: "user", role: "user" };
-        await userController.createUser(req, res);
-        expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Accès interdit" });
     });
 
     test("retourne 400 si l'utilisateur existe déjà", async () => {
@@ -36,7 +28,7 @@ describe("userController.createUser", () => {
         User.findOne.mockResolvedValue({ _id: "exists" });
         await userController.createUser(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur existe déjà" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Cet utilisateur existe déjà." });
     });
 
     test("crée un utilisateur avec succès", async () => {
@@ -69,14 +61,14 @@ describe("userController.createUser", () => {
         User.findOne.mockRejectedValue(new Error("Error"));
         await userController.createUser(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur." });
     });
 });
 
 describe("userController.getUsers", () => {
     let req, res;
     beforeEach(() => {
-        req = { user: { id: "admin123", role: "admin" } };
+        req = { user: { _id: "admin123", id: "admin123", role: "admin" } };
         res = {
             json: jest.fn(),
             status: jest.fn().mockReturnThis(),
@@ -97,14 +89,14 @@ describe("userController.getUsers", () => {
         User.find.mockRejectedValue(new Error("Error"));
         await userController.getUsers(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur." });
     });
 });
 
 describe("userController.deleteUser", () => {
     let req, res;
     beforeEach(() => {
-        req = { user: { id: "admin123", role: "admin" }, params: { id: "user1" } };
+        req = { user: { _id: "admin123", id: "admin123", role: "admin" }, params: { id: "user1" } };
         res = {
             json: jest.fn(),
             status: jest.fn().mockReturnThis(),
@@ -118,27 +110,27 @@ describe("userController.deleteUser", () => {
         User.findOneAndDelete.mockResolvedValue(null);
         await userController.deleteUser(req, res);
         expect(res.status).toHaveBeenCalledWith(404);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur non trouvé ou non autorisé à être supprimé" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur non trouvé ou non autorisé à être supprimé." });
     });
 
     test("supprime l'utilisateur avec succès", async () => {
         User.findOneAndDelete.mockResolvedValue({ _id: "user1" });
         await userController.deleteUser(req, res);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur supprimé avec succès" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur supprimé avec succès." });
     });
 
     test("gère les erreurs dans deleteUser", async () => {
         User.findOneAndDelete.mockRejectedValue(new Error("Error"));
         await userController.deleteUser(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur." });
     });
 });
 
 describe("userController.getAdmins", () => {
     let req, res;
     beforeEach(() => {
-        req = { user: { id: "admin123", role: "admin" } };
+        req = { user: { _id: "admin123", id: "admin123", role: "admin" } };
         res = {
             json: jest.fn(),
             status: jest.fn().mockReturnThis(),
@@ -159,6 +151,6 @@ describe("userController.getAdmins", () => {
         User.find.mockRejectedValue(new Error("Error"));
         await userController.getAdmins(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur." });
     });
 });

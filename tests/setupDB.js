@@ -1,3 +1,4 @@
+// tests/setupDB.js
 const mongoose = require("mongoose");
 const User = require("../src/models/User");
 const bcrypt = require("bcryptjs");
@@ -43,7 +44,6 @@ async function runSetup() {
             role: "user",
         });
         console.log("✅ John Doe ajouté.");
-
     } catch (error) {
         console.error("❌ Erreur lors du seed :", error);
     } finally {
@@ -53,7 +53,6 @@ async function runSetup() {
     }
 }
 
-// Exécute le script seulement si lancé directement
 if (require.main === module) {
     runSetup();
 }

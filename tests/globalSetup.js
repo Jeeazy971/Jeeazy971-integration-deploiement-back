@@ -1,4 +1,3 @@
-// tests/globalSetup.js
 const mongoose = require("mongoose");
 const User = require("../src/models/User");
 const bcrypt = require("bcryptjs");
@@ -10,17 +9,14 @@ dotenv.config({ path: path.resolve(__dirname, "../.env.test") });
 console.log("Chargement des variables d'environnement depuis .env.test (globalSetup)");
 
 module.exports = async () => {
-  // Connexion à la BDD de test
   await mongoose.connect(process.env.MONGO_URI_TEST, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   });
   console.log("Connexion à la base de test effectuée (globalSetup)");
 
-  // Nettoyage complet de la collection User
   await User.deleteMany({});
 
-  // Création de l'administrateur
   const adminEmail = process.env.ADMIN_EMAIL || "loise.fenoll@ynov.com";
   let admin = await User.findOne({ email: adminEmail });
   if (!admin) {
@@ -40,7 +36,6 @@ module.exports = async () => {
     console.log("Admin déjà présent (globalSetup)");
   }
 
-  // Création d'un utilisateur de test
   const testUserEmail = "john.doe@example.com";
   let testUser = await User.findOne({ email: testUserEmail });
   if (!testUser) {
@@ -57,8 +52,7 @@ module.exports = async () => {
     });
     console.log("Utilisateur de test créé (globalSetup)");
   }
-  
-  // Déconnexion pour laisser les tests se reconnecter
+
   await mongoose.disconnect();
   console.log("Déconnexion effectuée (globalSetup)");
 };

@@ -31,57 +31,24 @@ const options = {
         User: {
           type: "object",
           properties: {
-            _id: {
-              type: "string",
-              example: "60f7b2c9e3a1f1234567890a"
-            },
-            firstName: {
-              type: "string",
-              example: "Alice"
-            },
-            lastName: {
-              type: "string",
-              example: "Dupont"
-            },
-            email: {
-              type: "string",
-              format: "email",
-              example: "alice.dupont@example.com"
-            },
-            birthDate: {
-              type: "string",
-              format: "date",
-              example: "1980-05-20"
-            },
-            city: {
-              type: "string",
-              example: "Paris"
-            },
-            postalCode: {
-              type: "string",
-              example: "75001"
-            },
-            role: {
-              type: "string",
-              enum: ["user", "admin"],
-              example: "user"
-            }
+            _id: { type: "string", example: "60f7b2c9e3a1f1234567890a" },
+            firstName: { type: "string", example: "Alice" },
+            lastName: { type: "string", example: "Dupont" },
+            email: { type: "string", format: "email", example: "alice.dupont@example.com" },
+            birthDate: { type: "string", format: "date", example: "1980-05-20" },
+            city: { type: "string", example: "Paris" },
+            postalCode: { type: "string", example: "75001" },
+            role: { type: "string", enum: ["user", "admin"], example: "user" }
           }
         }
       }
     },
     security: [
-      {
-        bearerAuth: [],
-      },
+      { bearerAuth: [] }
     ],
   },
   apis: ['./src/controllers/*.js', './src/routes/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-
-module.exports = {
-  swaggerUi,
-  swaggerSpec,
-};
+module.exports = { swaggerUi, swaggerSpec };

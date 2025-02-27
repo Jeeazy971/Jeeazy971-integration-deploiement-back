@@ -12,14 +12,12 @@ beforeAll(async () => {
       useUnifiedTopology: true,
     });
   }
-  // Récupération du token admin
   const loginRes = await request(app)
     .post("/api/auth/login")
     .send({ email: "loise.fenoll@ynov.com", password: "ANKymoUTFu4rbybmQ9Mt" });
   token = loginRes.body.token;
   expect(token).toBeDefined();
 
-  // Vérifie qu'au moins un utilisateur existe.
   const usersRes = await request(app)
     .get("/api/users")
     .set("Authorization", `Bearer ${token}`);

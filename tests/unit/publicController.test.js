@@ -24,21 +24,45 @@ describe("publicController.registerUser", () => {
     });
 
     test("retourne 400 si le prénom est invalide", async () => {
-        req.body = { firstName: "Alice123", lastName: "Test", email: "alice@example.com", password: "pass", birthDate: "1990-01-01", city: "Paris", postalCode: "75001" };
+        req.body = {
+            firstName: "Alice123",
+            lastName: "Test",
+            email: "alice@example.com",
+            password: "pass",
+            birthDate: "1990-01-01",
+            city: "Paris",
+            postalCode: "75001"
+        };
         await publicController.registerUser(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({ msg: "Le prénom n'est pas valide." });
     });
 
     test("retourne 400 si l'email est invalide", async () => {
-        req.body = { firstName: "Alice", lastName: "Test", email: "invalid", password: "pass", birthDate: "1990-01-01", city: "Paris", postalCode: "75001" };
+        req.body = {
+            firstName: "Alice",
+            lastName: "Test",
+            email: "invalid",
+            password: "pass",
+            birthDate: "1990-01-01",
+            city: "Paris",
+            postalCode: "75001"
+        };
         await publicController.registerUser(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({ msg: "L'email n'est pas valide." });
     });
 
     test("retourne 400 si le code postal est invalide", async () => {
-        req.body = { firstName: "Alice", lastName: "Test", email: "alice@example.com", password: "pass", birthDate: "1990-01-01", city: "Paris", postalCode: "ABC" };
+        req.body = {
+            firstName: "Alice",
+            lastName: "Test",
+            email: "alice@example.com",
+            password: "pass",
+            birthDate: "1990-01-01",
+            city: "Paris",
+            postalCode: "ABC"
+        };
         await publicController.registerUser(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({ msg: "Le code postal n'est pas valide." });
@@ -46,15 +70,33 @@ describe("publicController.registerUser", () => {
 
     test("retourne 400 si l'utilisateur est mineur", async () => {
         const today = new Date();
-        const birthDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate()).toISOString().split("T")[0];
-        req.body = { firstName: "Alice", lastName: "Test", email: "alice@example.com", password: "pass", birthDate, city: "Paris", postalCode: "75001" };
+        const birthDate = new Date(today.getFullYear() - 17, today.getMonth(), today.getDate())
+            .toISOString()
+            .split("T")[0];
+        req.body = {
+            firstName: "Alice",
+            lastName: "Test",
+            email: "alice@example.com",
+            password: "pass",
+            birthDate,
+            city: "Paris",
+            postalCode: "75001"
+        };
         await publicController.registerUser(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
         expect(res.json).toHaveBeenCalledWith({ msg: "Vous devez être majeur pour vous inscrire." });
     });
 
     test("retourne 400 si un utilisateur avec cet email existe déjà", async () => {
-        req.body = { firstName: "Alice", lastName: "Test", email: "alice@example.com", password: "pass", birthDate: "1990-01-01", city: "Paris", postalCode: "75001" };
+        req.body = {
+            firstName: "Alice",
+            lastName: "Test",
+            email: "alice@example.com",
+            password: "pass",
+            birthDate: "1990-01-01",
+            city: "Paris",
+            postalCode: "75001"
+        };
         User.findOne.mockResolvedValue({ _id: "exists" });
         await publicController.registerUser(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
@@ -62,7 +104,15 @@ describe("publicController.registerUser", () => {
     });
 
     test("inscrit un utilisateur avec succès", async () => {
-        req.body = { firstName: "Alice", lastName: "Test", email: "alice@example.com", password: "pass", birthDate: "1990-01-01", city: "Paris", postalCode: "75001" };
+        req.body = {
+            firstName: "Alice",
+            lastName: "Test",
+            email: "alicetest@example.com",
+            password: "pass",
+            birthDate: "1990-01-01",
+            city: "Paris",
+            postalCode: "75001"
+        };
         User.findOne.mockResolvedValue(null);
         User.prototype.save = jest.fn().mockResolvedValue();
         await publicController.registerUser(req, res);
@@ -71,7 +121,15 @@ describe("publicController.registerUser", () => {
     });
 
     test("gère les erreurs dans registerUser", async () => {
-        req.body = { firstName: "Alice", lastName: "Test", email: "alice@example.com", password: "pass", birthDate: "1990-01-01", city: "Paris", postalCode: "75001" };
+        req.body = {
+            firstName: "Alice",
+            lastName: "Test",
+            email: "alicetest@example.com",
+            password: "pass",
+            birthDate: "1990-01-01",
+            city: "Paris",
+            postalCode: "75001"
+        };
         User.findOne.mockRejectedValue(new Error("Error"));
         await publicController.registerUser(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
@@ -97,11 +155,7 @@ describe("publicController.getPublicUsers", () => {
             { _id: "1", firstName: "Alice", lastName: "Test", email: "alice@example.com", birthDate: "1990-01-01", city: "Paris", postalCode: "75001" },
             { _id: "2", firstName: "Bob", lastName: "Test", email: "bob@example.com", birthDate: "1985-01-01", city: "Lyon", postalCode: "69000" }
         ];
-        // Simuler la projection réalisée dans la requête MongoDB
-        const projectedUsers = fakeUsers.map(user => {
-            const { email, birthDate, ...rest } = user;
-            return rest;
-        });
+        const projectedUsers = fakeUsers.map(({ email, birthDate, ...rest }) => rest);
         User.find.mockResolvedValue(projectedUsers);
         await publicController.getPublicUsers(req, res);
         expect(res.status).toHaveBeenCalledWith(200);
