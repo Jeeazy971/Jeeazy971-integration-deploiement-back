@@ -6,7 +6,7 @@ const { validateEmail, validatePostalCode, validateName, isAdult } = require("..
  * Permet à un utilisateur de s'inscrire publiquement.
  * Effectue toutes les vérifications (présence, format, âge).
  */
-exports.registerUser = async (req, res) => {
+exports.registerPublicUser = async (req, res) => {
     try {
         const { firstName, lastName, email, password, birthDate, city, postalCode } = req.body;
 

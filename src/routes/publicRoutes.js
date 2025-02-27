@@ -1,13 +1,20 @@
 // src/routes/publicRoutes.js
 const express = require("express");
 const router = express.Router();
-const { registerUser, getPublicUsers } = require("../controllers/publicController");
+const { registerPublicUser, getPublicUsers } = require("../controllers/publicController");
+
+/**
+ * @swagger
+ * tags:
+ *   name: Public
+ *   description: Routes pour l'inscription publique et l'accès aux informations non sensibles
+ */
 
 /**
  * @swagger
  * /public/register:
  *   post:
- *     summary: Inscription publique d'un utilisateur
+ *     summary: Inscription publique d'un utilisateur (rôle = user)
  *     tags: [Public]
  *     requestBody:
  *       required: true
@@ -48,7 +55,7 @@ const { registerUser, getPublicUsers } = require("../controllers/publicControlle
  *                 example: "75001"
  *     responses:
  *       201:
- *         description: Inscription réussie.
+ *         description: Inscription réussie (rôle = user).
  *         content:
  *           application/json:
  *             schema:
@@ -58,12 +65,11 @@ const { registerUser, getPublicUsers } = require("../controllers/publicControlle
  *                   type: string
  *                   example: "Inscription réussie."
  *       400:
- *         description: Données invalides.
+ *         description: Données invalides (ex: email déjà pris, champs manquants).
  *       500:
  *         description: Erreur serveur.
  */
-router.post("/register", registerUser);
-
+router.post("/register", registerPublicUser);
 /**
  * @swagger
  * /public/users:

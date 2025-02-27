@@ -7,7 +7,11 @@ const router = express.Router();
  * @swagger
  * /users/create:
  *   post:
- *     summary: Créer un utilisateur par l'administrateur ou l'utilisateur authentifié
+ *     summary: Créer un utilisateur authentifié
+ *     description: >
+ *       Cet endpoint permet à un utilisateur authentifié de créer un nouvel utilisateur.
+ *       - Si l'utilisateur connecté est **admin**, il peut spécifier le rôle du nouvel utilisateur (user ou admin).
+ *       - Si l'utilisateur connecté est **user**, le rôle sera forcé à "user", quelle que soit la valeur envoyée.
  *     tags: [Utilisateurs]
  *     security:
  *       - bearerAuth: []
@@ -41,6 +45,10 @@ const router = express.Router();
  *               postalCode:
  *                 type: string
  *                 example: "75001"
+ *               role:
+ *                 type: string
+ *                 enum: [ "user", "admin" ]
+ *                 example: "user"
  *             required:
  *               - firstName
  *               - lastName
@@ -61,7 +69,9 @@ const router = express.Router();
  *                   type: string
  *                   example: "Utilisateur créé avec succès."
  *       400:
- *         description: Utilisateur déjà existant.
+ *         description: Données invalides ou utilisateur existant.
+ *       401:
+ *         description: Authentification requise.
  *       403:
  *         description: Accès interdit.
  *       500:
@@ -86,20 +96,6 @@ router.post("/create", authMiddleware, createUser);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
- *             examples:
- *               exemple:
- *                 value: [
- *                   {
- *                     "_id": "60f7b2c9e3a1f1234567890a",
- *                     "firstName": "Alice",
- *                     "lastName": "Dupont",
- *                     "email": "alice.dupont@example.com",
- *                     "birthDate": "1980-05-20T00:00:00.000Z",
- *                     "city": "Paris",
- *                     "postalCode": "75001",
- *                     "role": "user"
- *                   }
- *                 ]
  *       403:
  *         description: Accès interdit.
  *       500:
@@ -124,20 +120,6 @@ router.get("/", authMiddleware, getUsers);
  *               type: array
  *               items:
  *                 $ref: '#/components/schemas/User'
- *             examples:
- *               exemple:
- *                 value: [
- *                   {
- *                     "_id": "60f7b2c9e3a1f1234567890b",
- *                     "firstName": "Admin",
- *                     "lastName": "User",
- *                     "email": "loise.fenoll@ynov.com",
- *                     "birthDate": "1990-01-01T00:00:00.000Z",
- *                     "city": "Paris",
- *                     "postalCode": "75000",
- *                     "role": "admin"
- *                   }
- *                 ]
  *       403:
  *         description: Accès interdit.
  *       500:
@@ -149,7 +131,7 @@ router.get("/admins", authMiddleware, getAdmins);
  * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Supprimer un utilisateur créé par l'administrateur
+ *     summary: Supprimer un utilisateur créé par l'utilisateur authentifié
  *     tags: [Utilisateurs]
  *     security:
  *       - bearerAuth: []
@@ -159,18 +141,10 @@ router.get("/admins", authMiddleware, getAdmins);
  *         schema:
  *           type: string
  *         required: true
- *         description: L'ID de l'utilisateur à supprimer, par exemple "60f7b2c9e3a1f1234567890a"
+ *         description: L'ID de l'utilisateur à supprimer.
  *     responses:
  *       200:
  *         description: Utilisateur supprimé avec succès.
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 msg:
- *                   type: string
- *                   example: "Utilisateur supprimé avec succès"
  *       403:
  *         description: Accès interdit.
  *       404:

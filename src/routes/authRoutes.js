@@ -55,7 +55,7 @@ const router = express.Router();
  * @swagger
  * /auth/login:
  *   post:
- *     summary: Authentification de l'administrateur
+ *     summary: Authentification de tout utilisateur (admin ou user)
  *     tags: [Authentification]
  *     requestBody:
  *       required: true
@@ -72,8 +72,8 @@ const router = express.Router();
  *               $ref: '#/components/schemas/AuthResponse'
  *       400:
  *         description: Identifiants incorrects.
- *       403:
- *         description: Accès réservé aux administrateurs.
+ *       401:
+ *         description: Token invalide.
  *       500:
  *         description: Erreur serveur.
  */

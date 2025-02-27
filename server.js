@@ -7,6 +7,7 @@ const { swaggerUi, swaggerSpec } = require('./config/swagger');
 const userRoutes = require('./src/routes/userRoutes');
 const authRoutes = require('./src/routes/authRoutes');
 const publicRoutes = require('./src/routes/publicRoutes');
+const adminRoutes = require('./src/routes/adminRoutes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ app.use(cors());
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/public', publicRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Swagger – documentation de l’API
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));

@@ -3,7 +3,7 @@ const User = require("../models/User");
 const jwt = require("jsonwebtoken");
 
 /**
- * Connexion de l'administrateur.
+ * Connexion (login) pour tous les utilisateurs (admin ou user).
  */
 exports.login = async (req, res) => {
   try {
@@ -11,22 +11,15 @@ exports.login = async (req, res) => {
     if (!email || !password) {
       return res.status(400).json({ msg: "Email et mot de passe sont requis." });
     }
-
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(400).json({ msg: "Utilisateur non trouvé" });
+      return res.status(400).json({ msg: "Utilisateur non trouvé." });
     }
-
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
-      return res.status(400).json({ msg: "Mot de passe incorrect" });
+      return res.status(400).json({ msg: "Mot de passe incorrect." });
     }
-
-    // Seul l'administrateur peut se connecter via cette route
-    if (user.role !== "admin") {
-      return res.status(403).json({ msg: "Accès réservé aux administrateurs" });
-    }
-
+    // Générer un token JWT incluant l'id et le role
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -35,7 +28,7 @@ exports.login = async (req, res) => {
     return res.json({ token });
   } catch (error) {
     console.error("Erreur lors du login:", error);
-    return res.status(500).json({ msg: "Erreur serveur" });
+    return res.status(500).json({ msg: "Erreur serveur." });
   }
 };
 
