@@ -11,8 +11,8 @@ const options = {
     },
     servers: [
       {
-        url: process.env.NODE_ENV === 'production' && process.env.VERCEL_URL
-          ? `https://${process.env.VERCEL_URL}/api`
+        url: process.env.NODE_ENV === 'production'
+          ? `https://jeeazy971-integration-deploiement-back.vercel.app/api`
           : "http://localhost:5000/api",
         description: process.env.NODE_ENV === 'production'
           ? "Serveur de production"
