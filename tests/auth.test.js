@@ -11,6 +11,7 @@ describe("Tests d'authentification", () => {
         useUnifiedTopology: true,
       });
     }
+    // S'assurer que les utilisateurs de test existent (globalSetup devrait s'en charger)
   });
 
   it("Devrait retourner un token pour un admin valide", async () => {
@@ -32,7 +33,7 @@ describe("Tests d'authentification", () => {
         password: "wrongpassword",
       });
     expect(res.status).toBe(400);
-    expect(res.body.msg).toBe("Utilisateur non trouvé");
+    expect(res.body.msg).toBe("Utilisateur non trouvé.");
   });
 
   it("Devrait refuser l'accès avec un mauvais mot de passe", async () => {
@@ -43,7 +44,30 @@ describe("Tests d'authentification", () => {
         password: "wrongpassword",
       });
     expect(res.status).toBe(400);
-    expect(res.body.msg).toBe("Mot de passe incorrect");
+    expect(res.body.msg).toBe("Mot de passe incorrect.");
+  });
+
+  it("Devrait refuser l'accès si l'utilisateur n'est pas admin", async () => {
+    // On s'assure que l'utilisateur non-admin existe en l'inscrivant via l'endpoint public
+    await request(app)
+      .post("/api/public/register")
+      .send({
+        firstName: "John",
+        lastName: "Doe",
+        email: "john.doe@example.com",
+        password: "password123",
+        birthDate: "1990-01-01",
+        city: "Paris",
+        postalCode: "75001",
+      });
+    const res = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "john.doe@example.com",
+        password: "password123",
+      });
+    expect(res.status).toBe(403);
+    expect(res.body.msg).toBe("Accès réservé aux administrateurs.");
   });
 
   afterAll(async () => {

@@ -16,7 +16,7 @@ describe("authMiddleware", () => {
     test("retourne 401 si le header Authorization est absent", () => {
         authMiddleware(req, res, next);
         expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Accès non autorisé, token manquant" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Token manquant ou invalide." });
     });
 
     test("retourne 401 si le token est invalide", () => {
@@ -24,7 +24,7 @@ describe("authMiddleware", () => {
         jwt.verify = jest.fn(() => { throw new Error("invalid token"); });
         authMiddleware(req, res, next);
         expect(res.status).toHaveBeenCalledWith(401);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Token invalide" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Token invalide." });
     });
 
     test("appelle next() si le token est valide", () => {

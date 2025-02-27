@@ -30,7 +30,7 @@ describe("authController.login", () => {
         User.findOne.mockResolvedValue(null);
         await authController.login(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur non trouvé" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Utilisateur non trouvé." });
     });
 
     test("retourne 400 si le mot de passe est incorrect", async () => {
@@ -39,7 +39,7 @@ describe("authController.login", () => {
         User.findOne.mockResolvedValue(fakeUser);
         await authController.login(req, res);
         expect(res.status).toHaveBeenCalledWith(400);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Mot de passe incorrect" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Mot de passe incorrect." });
     });
 
     test("retourne 403 si l'utilisateur n'est pas admin", async () => {
@@ -48,7 +48,7 @@ describe("authController.login", () => {
         User.findOne.mockResolvedValue(fakeUser);
         await authController.login(req, res);
         expect(res.status).toHaveBeenCalledWith(403);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Accès réservé aux administrateurs" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Accès réservé aux administrateurs." });
     });
 
     test("retourne un token si la connexion est réussie", async () => {
@@ -63,11 +63,9 @@ describe("authController.login", () => {
     test("gère les erreurs dans le bloc try/catch", async () => {
         req.body = { email: "test@example.com", password: "correct" };
         User.findOne.mockRejectedValue(new Error("Test error"));
-        try {
-            await authController.login(req, res);
-        } catch (e) {
-            expect(e.message).toBe("Test error");
-        }
+        await authController.login(req, res);
+        expect(res.status).toHaveBeenCalledWith(500);
+        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur." });
     });
 });
 
@@ -113,6 +111,6 @@ describe("authController.registerAdmin", () => {
         User.findOne.mockRejectedValue(new Error("Error"));
         await authController.registerAdmin(req, res);
         expect(res.status).toHaveBeenCalledWith(500);
-        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur" });
+        expect(res.json).toHaveBeenCalledWith({ msg: "Erreur serveur." });
     });
 });

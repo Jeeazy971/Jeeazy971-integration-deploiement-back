@@ -11,16 +11,12 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000/api',
-        description: 'Serveur local sur le port 5000',
-      },
-      {
-        url: 'http://localhost:5001/api',
-        description: 'Serveur local sur le port 5001',
-      },
-      {
-        url: "https://jeeazy971-integration-deploiement-back.vercel.app/api",
-        description: "Serveur de production",
+        url: process.env.NODE_ENV === 'production' && process.env.VERCEL_URL
+          ? `https://${process.env.VERCEL_URL}/api`
+          : "http://localhost:5000/api",
+        description: process.env.NODE_ENV === 'production'
+          ? "Serveur de production"
+          : "Serveur local sur le port 5000",
       }
     ],
     components: {
@@ -31,19 +27,28 @@ const options = {
           bearerFormat: 'JWT',
         },
       },
+      schemas: {
+        User: {
+          type: "object",
+          properties: {
+            _id: { type: "string", example: "60f7b2c9e3a1f1234567890a" },
+            firstName: { type: "string", example: "Alice" },
+            lastName: { type: "string", example: "Dupont" },
+            email: { type: "string", format: "email", example: "alice.dupont@example.com" },
+            birthDate: { type: "string", format: "date", example: "1980-05-20" },
+            city: { type: "string", example: "Paris" },
+            postalCode: { type: "string", example: "75001" },
+            role: { type: "string", enum: ["user", "admin"], example: "user" }
+          }
+        }
+      }
     },
     security: [
-      {
-        bearerAuth: [],
-      },
+      { bearerAuth: [] }
     ],
   },
   apis: ['./src/controllers/*.js', './src/routes/*.js'],
 };
 
 const swaggerSpec = swaggerJsdoc(options);
-
-module.exports = {
-  swaggerUi,
-  swaggerSpec,
-};
+module.exports = { swaggerUi, swaggerSpec };
